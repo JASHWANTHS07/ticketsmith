@@ -29,3 +29,18 @@ def test_fenced_code_ignored():
 def test_empty_text():
     t = parse_ticket("")
     assert t.title is None and t.sections == []
+
+
+def test_inner_backtick_fence_does_not_close_tilde_fence():
+    t = parse_ticket("# T\n~~~\n```\n## Acceptance criteria\n- a\n~~~\n")
+    assert t.sections == []
+
+
+def test_longer_fence_shows_markdown_example():
+    t = parse_ticket("# T\n````md\n```\n## fake\n```\n````\n## Real\n")
+    assert [s.heading for s in t.sections] == ["Real"]
+
+
+def test_empty_and_bare_checkbox_items_skipped():
+    t = parse_ticket("# T\n## Done when\n- [ ]\n-   \n- [x] real\n")
+    assert t.sections[0].items == ["real"]

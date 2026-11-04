@@ -7,6 +7,8 @@ from ticketsmith.check import check, format_text
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Windows pipes default to cp1252; report text (filenames) may not fit it.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(
         prog="ticketsmith", description="Check how ready a ticket is for an AI coding agent."
     )
@@ -20,7 +22,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         if args.ticket == "-":
-            name, text = "<stdin>", sys.stdin.read()
+            name, text = "<stdin>", sys.stdin.buffer.read().decode("utf-8-sig")
         else:
             name = args.ticket
             with open(args.ticket, encoding="utf-8-sig") as file:

@@ -4,8 +4,8 @@ import re
 from dataclasses import dataclass, field
 
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
-ITEM = re.compile(r"^\s*(?:[-*]|\d+\.)\s+(?:\[[ xX]\]\s+)?(.+)$")
-FENCE = re.compile(r"^\s*(```|~~~)")
+ITEM = re.compile(r"^\s*(?:[-*]|\d+\.)\s+(?:\[[ xX]\](?:\s+|$))?(.*)$")
+FENCE = re.compile(r"^\s*(`{3,}|~{3,})(.*)$")
 
 
 @dataclass(frozen=True)
@@ -26,12 +26,15 @@ class Ticket:
 def parse_ticket(text: str) -> Ticket:
     title: str | None = None
     sections: list[Section] = []
-    in_fence = False
+    fence: str | None = None  # opening fence while inside a code block
     for number, line in enumerate(text.splitlines(), start=1):
-        if FENCE.match(line):
-            in_fence = not in_fence
+        if fence:
+            # Closes only with the same character, at least as long, nothing after it.
+            if (m := FENCE.match(line)) and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence) and not m.group(2).strip():
+                fence = None
             continue
-        if in_fence:
+        if m := FENCE.match(line):
+            fence = m.group(1)
             continue
         if heading := HEADING.match(line):
             level, name = len(heading.group(1)), heading.group(2)
@@ -39,6 +42,6 @@ def parse_ticket(text: str) -> Ticket:
                 title = name
             else:
                 sections.append(Section(name, level, number))
-        elif sections and (item := ITEM.match(line)):
+        elif sections and (item := ITEM.match(line)) and item.group(1).strip():
             sections[-1].items.append(item.group(1).strip())
     return Ticket(text, title, sections)

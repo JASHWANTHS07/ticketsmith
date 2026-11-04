@@ -39,10 +39,31 @@ def test_utf8_bom_tolerated(tmp_path, capsys):
 
 
 def test_stdin(monkeypatch, capsys):
-    monkeypatch.setattr("sys.stdin", io.StringIO("# T\n"))
+    monkeypatch.setattr("sys.stdin", FakeStdin(b"# T\n"))
     assert main(["check", "-"]) == 1
     assert "<stdin>" in capsys.readouterr().out
 
 
 def test_no_subcommand_exit_2(capsys):
     assert main([]) == 2
+
+
+class FakeStdin:
+    def __init__(self, data: bytes):
+        self.buffer = io.BytesIO(data)
+
+
+def test_stdin_decodes_utf8_with_bom(monkeypatch, capsys):
+    monkeypatch.setattr("sys.stdin", FakeStdin("﻿## Acceptance criteria\n- Ý Џ\n".encode("utf-8")))
+    assert main(["check", "-"]) == 0
+
+
+def test_non_ascii_filename_printable_on_cp1252_stdout(tmp_path, monkeypatch):
+    p = tmp_path / "тикет.md"
+    p.write_text("# T\n## Done when\n- a\n", encoding="utf-8")
+    raw = io.BytesIO()
+    monkeypatch.setattr("sys.stdout", io.TextIOWrapper(raw, encoding="cp1252"))
+    assert main(["check", str(p)]) == 0
+    import sys
+    sys.stdout.flush()
+    assert "тикет.md".encode("utf-8") in raw.getvalue()
