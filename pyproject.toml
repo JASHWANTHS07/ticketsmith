@@ -1,0 +1,22 @@
+[project]
+name = "ticketsmith"
+version = "0.1.0"
+description = "Checks how ready a ticket is for an AI coding agent to implement."
+readme = "README.md"
+authors = [
+    { name = "Jashwanth S", email = "itsforstuffofjashwanth@GMAIL.COM" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+ticketsmith = "ticketsmith.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
