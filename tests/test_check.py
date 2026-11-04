@@ -26,7 +26,7 @@ def test_check_empty_text():
 
 def test_format_text_with_finding():
     assert format_text("search-speed.md", check("# T\n")) == (
-        "search-speed.md — score 75/100\n"
+        "search-speed.md - score 75/100\n"
         "  ERROR AC001  No acceptance criteria section found.\n"
         '               Fix: Add "## Acceptance criteria" with a checklist of observable outcomes.'
     )
@@ -38,4 +38,4 @@ def test_format_text_includes_line_when_present():
 
 
 def test_format_text_clean():
-    assert format_text("ok.md", check("# T\n## Done when\n- a\n")) == "ok.md — score 100/100\n  No findings."
+    assert format_text("ok.md", check("# T\n## Done when\n- a\n")) == "ok.md - score 100/100\n  No findings."

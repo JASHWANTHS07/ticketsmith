@@ -25,7 +25,7 @@ def check(text: str) -> Report:
 
 
 def format_text(name: str, report: Report) -> str:
-    lines = [f"{name} — score {report.score}/100"]
+    lines = [f"{name} - score {report.score}/100"]
     if not report.findings:
         lines.append("  No findings.")
     for f in report.findings:
